@@ -21,60 +21,110 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.aspect = window.innerWidth / window.innerHeight;
 
-    camera.updateProjectMatrix();
+    camera.updateProjectionMatrix();
 });
 
-var player = { speed: 0.2, height: 1, turnSpeed: Math.PI * 0.2 };
-var keyboard = {};
 
+
+
+// player attributes
+var player = { speed: 0.05, height: 0.5, mouseSensitivity: 0.002 };
+
+
+// Setting player start position
+camera.position.z = 5;
+camera.position.y = player.height;
+
+
+
+
+// Object creation
+
+// creating and adding cube
 var geometry = new THREE.BoxGeometry();
 var material = new THREE.MeshBasicMaterial({ color: 0x3d3d3d });
 
 var cube = new THREE.Mesh(geometry, material);
+
+cube.position.y = 0.5;
 scene.add(cube);
 
-
-meshFloor = new THREE.Mesh(
-    new THREE.PlaneGeometry(10, 10, 10, 10),
+// creating and adding floor
+var meshFloor = new THREE.Mesh(
+    new THREE.PlaneGeometry(11, 11, 11, 11),
     new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true })
 );
 meshFloor.rotation.x -= Math.PI / 2; // Rotate the floor 90 degrees
 scene.add(meshFloor);
 
 
-camera.position.z = 5;
-camera.position.y = 5;
-camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 
-var animate = function() {
-    requestAnimationFrame(animate);
-
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
 
 
-    // Keyboard movement inputs
-    if (keyboard[87]) { // W key
-        camera.position.x -= -Math.sin(camera.rotation.y) * player.speed;
-        camera.position.z -= Math.cos(camera.rotation.y) * player.speed;
-    }
-    if (keyboard[83]) { // S key
-        camera.position.x += -Math.sin(camera.rotation.y) * player.speed;
-        camera.position.z += Math.cos(camera.rotation.y) * player.speed;
-    }
-    if (keyboard[65]) { // A key
-        // Redirect motion by 90 degrees
-        camera.position.x += -Math.sin(camera.rotation.y + Math.PI / 2) * player.speed;
-        camera.position.z += Math.cos(camera.rotation.y + Math.PI / 2) * player.speed;
-    }
-    if (keyboard[68]) { // D key
-        camera.position.x += -Math.sin(camera.rotation.y - Math.PI / 2) * player.speed;
-        camera.position.z += Math.cos(camera.rotation.y - Math.PI / 2) * player.speed;
-    }
 
-    renderer.render(scene, camera);
+
+// Add mouse lock/pointer lock
+
+var canvas = document.querySelector('canvas');
+
+
+canvas.requestPointerLock = canvas.requestPointerLock ||
+    canvas.mozRequestPointerLock;
+
+document.exitPointerLock = document.exitPointerLock ||
+    document.mozExitPointerLock;
+
+canvas.onclick = function() {
+    canvas.requestPointerLock();
 };
+
+document.addEventListener('pointerlockchange', lockChangeAlert, false);
+document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
+
+function lockChangeAlert() {
+    if (document.pointerLockElement === canvas ||
+        document.mozPointerLockElement === canvas) {
+        console.log('The pointer lock status is now locked');
+        document.addEventListener("mousemove", updatePosition, false);
+    } else {
+        console.log('The pointer lock status is now unlocked');
+        document.removeEventListener("mousemove", updatePosition, false);
+    }
+}
+
+
+
+
+// Add ability to look around
+
+var euler = new THREE.Euler(0, 0, 0, 'YXZ');
+
+var PI_2 = Math.PI / 2;
+
+function updatePosition(event) {
+
+    var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+    var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+    euler.setFromQuaternion(camera.quaternion);
+
+    euler.y -= movementX * player.mouseSensitivity;
+    euler.x -= movementY * player.mouseSensitivity;
+
+    euler.x = Math.max(PI_2 - Math.PI, Math.min(PI_2 - 0, euler.x));
+
+    camera.quaternion.setFromEuler(euler);
+
+}
+
+
+
+
+
+
+// Add keyboard controls
+var keyboard = {};
 
 function keyDown(event) {
     keyboard[event.keyCode] = true;
@@ -83,6 +133,45 @@ function keyDown(event) {
 function keyUp(event) {
     keyboard[event.keyCode] = false;
 }
+
 window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
+
+
+
+
+
+
+
+
+// Animation function
+
+function animate() {
+
+    requestAnimationFrame(animate);
+
+    // Keyboard movement inputs
+    if (keyboard[87]) { // W key
+        camera.position.x += -Math.sin(camera.rotation.y) * player.speed;
+        camera.position.z -= Math.cos(camera.rotation.y) * player.speed;
+    }
+    if (keyboard[83]) { // S key
+        camera.position.x -= -Math.sin(camera.rotation.y) * player.speed;
+        camera.position.z += Math.cos(camera.rotation.y) * player.speed;
+    }
+    if (keyboard[65]) { // A key
+        camera.position.x -= -Math.sin(camera.rotation.y - Math.PI / 2) * (player.speed * 0.5);
+        camera.position.z += Math.cos(camera.rotation.y - Math.PI / 2) * (player.speed * 0.5);
+    }
+    if (keyboard[68]) { // D key
+        camera.position.x += -Math.sin(camera.rotation.y - Math.PI / 2) * (player.speed * 0.4);
+        camera.position.z -= Math.cos(camera.rotation.y - Math.PI / 2) * (player.speed * 0.4);
+    }
+
+
+    renderer.render(scene, camera);
+
+};
+
+
 animate();
