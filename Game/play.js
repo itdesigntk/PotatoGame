@@ -123,6 +123,7 @@ function updatePosition(event) {
 
 
 
+
 // Add keyboard controls
 var keyboard = {};
 
@@ -152,20 +153,48 @@ function animate() {
 
     // Keyboard movement inputs
     if (keyboard[87]) { // W key
-        camera.position.x += -Math.sin(camera.rotation.y) * player.speed;
-        camera.position.z -= Math.cos(camera.rotation.y) * player.speed;
+
+        if (camera.rotation.x <= Math.PI / 2 && camera.rotation.x >= -Math.PI / 2) {
+            camera.position.x += -Math.sin(camera.rotation.y) * player.speed;
+            camera.position.z -= Math.cos(camera.rotation.y) * player.speed;
+        } else {
+            camera.position.x -= Math.sin(camera.rotation.y) * player.speed;
+            camera.position.z -= -Math.cos(camera.rotation.y) * player.speed;
+        }
     }
     if (keyboard[83]) { // S key
-        camera.position.x -= -Math.sin(camera.rotation.y) * player.speed;
-        camera.position.z += Math.cos(camera.rotation.y) * player.speed;
+
+        if (camera.rotation.x <= Math.PI / 2 && camera.rotation.x >= -Math.PI / 2) {
+            camera.position.x -= -Math.sin(camera.rotation.y) * player.speed;
+            camera.position.z += Math.cos(camera.rotation.y) * player.speed;
+        } else {
+            camera.position.x -= -Math.sin(camera.rotation.y) * player.speed;
+            camera.position.z += -Math.cos(camera.rotation.y) * player.speed;
+        }
+
     }
     if (keyboard[65]) { // A key
-        camera.position.x -= -Math.sin(camera.rotation.y - Math.PI / 2) * (player.speed * 0.5);
-        camera.position.z += Math.cos(camera.rotation.y - Math.PI / 2) * (player.speed * 0.5);
+
+        if (camera.rotation.x <= Math.PI / 2 && camera.rotation.x >= -Math.PI / 2) {
+            camera.position.x -= -Math.sin(camera.rotation.y - Math.PI / 2) * (player.speed * 0.5);
+            camera.position.z += Math.cos(camera.rotation.y - Math.PI / 2) * (player.speed * 0.5);
+        } else {
+            camera.position.x -= Math.sin(camera.rotation.y - Math.PI / 2) * (player.speed * 0.5);
+            camera.position.z += Math.cos(camera.rotation.y - Math.PI / 2) * (player.speed * 0.5);
+        }
+
     }
     if (keyboard[68]) { // D key
-        camera.position.x += -Math.sin(camera.rotation.y - Math.PI / 2) * (player.speed * 0.4);
-        camera.position.z -= Math.cos(camera.rotation.y - Math.PI / 2) * (player.speed * 0.4);
+
+        if (camera.rotation.x <= Math.PI / 2 && camera.rotation.x >= -Math.PI / 2) {
+            camera.position.x += -Math.sin(camera.rotation.y - Math.PI / 2) * (player.speed * 0.4);
+            camera.position.z -= Math.cos(camera.rotation.y - Math.PI / 2) * (player.speed * 0.4);
+        } else {
+            camera.position.x += Math.sin(camera.rotation.y - Math.PI / 2) * (player.speed * 0.4);
+            camera.position.z -= Math.cos(camera.rotation.y - Math.PI / 2) * (player.speed * 0.4);
+
+        }
+
     }
 
 
